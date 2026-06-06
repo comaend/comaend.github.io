@@ -7,15 +7,15 @@
 <body>
     <py-script>
         import http.server
-import socketserver
-import os
-import cgi
+        import socketserver
+        import os
+        import cgi
 
-PORT = 8080
-DIRECTORY = r"C:\Users\Gulbins\Downloads\Neuer Ordner"   
+        PORT = 8080
+        DIRECTORY = r"C:\Users\Gulbins\Downloads\Neuer Ordner"   
 
-class MyHandler(http.server.SimpleHTTPRequestHandler):
-    def do_GET(self):
+        class MyHandler(http.server.SimpleHTTPRequestHandler):
+              def do_GET(self):
         # Zeige das Upload-Formular und die Dateiliste
         self.send_response(200)
         self.send_header("Content-type", "text/html; charset=utf-8")
