@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="https://pyscript.net" />
+    <script defer src="https://pyscript.net"></script>
+</head>
+<body>
+    <py-script>
+        import http.server
+import socketserver
+import os
+import cgi
+
+PORT = 8080
+DIRECTORY = r"C:\Users\Gulbins\Downloads\Neuer Ordner"   
+
+class MyHandler(http.server.SimpleHTTPRequestHandler):
+    def do_GET(self):
+        # Zeige das Upload-Formular und die Dateiliste
+        self.send_response(200)
+        self.send_header("Content-type", "text/html; charset=utf-8")
+        self.end_headers()
+        
+        files = os.listdir(DIRECTORY)
+        file_list = ""
+        for f in files:
+            if f != "server.py": # Verstecke das Skript selbst
+                file_list += f'<li><a href="{f}">{f}</a> <a href="download?f={f}">[Download]</a></li>'
+
+        html = f"""
+        <html>
+        <head><title>ZTE Upload Server</title>
+        <style>body{{font-family:sans-serif; max-width:800px; margin:20px auto;}}</style>
+        </head>
+        <body>
+        <h1>📂 ZTE A56 Datei Server</h1>
+        <h3>Upload Datei:</h3>
+        <form method="POST" enctype="multipart/form-data">
+          <input type="file" name="file">
+          <input type="submit" value="Hochladen">
+        </form>
+        <hr>
+        <h3>Vorhandene Dateien:</h3>
+        <ul>{file_list}</ul>
+        </body>
+        </html>
+        """
+        self.wfile.write(html.encode('utf-8'))
+
+    def do_POST(self):
+        form = cgi.FieldStorage(
+            fp=self.rfile,
+            headers=self.headers,
+            environ={'REQUEST_METHOD': 'POST',
+                     'CONTENT_TYPE': self.headers['Content-Type'],
+                     })
+        item = form['file']
+        file_path = os.path.join(DIRECTORY, item.filename)
+        with open(file_path, 'wb') as f:
+            f.write(item.file.read())
+        
+        self.send_response(302) # Weiterleitung nach Upload
+        self.send_header('Location', '/')
+        self.end_headers()
+
+os.chdir(DIRECTORY)
+with socketserver.TCPServer(("", PORT), MyHandler) as httpd:
+    print(f"Server läuft auf Port {PORT}")
+    httpd.serve_forever()   
+    </py-script>
+</body>
+</html>
